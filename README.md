@@ -44,15 +44,15 @@ Hadoop 内部完成的。
 用户编写的程序分为三个部分：Mapper、Reducer、Driver
 
 1. Mapper阶段
-	>用户自定义的Mapper类需要继承Hadoop提供的Mapper父类，并重写其map()方法
+	-用户自定义的Mapper类需要继承Hadoop提供的Mapper父类，并重写其map()方法
 	
-	>Mapper的输入数据是KV对的形式
+	-Mapper的输入数据是KV对的形式
 	
-	>Mapper的业务逻辑写在map()方法中
+	-Mapper的业务逻辑写在map()方法中
 	
-	>Mapper的输出数据是KV对的形式
+	-Mapper的输出数据是KV对的形式
 	
-	>map()方法对每一个<K,V>调用一次
+	-map()方法对每一个<K,V>调用一次
 
 
 2. Reducer阶段
