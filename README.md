@@ -1,6 +1,6 @@
-# MapReduce介绍
+# 一、MapReduce介绍
 
-## 1.MapReduce定义
+## 1. MapReduce定义
 
 MapReduce是一种编程模型，用于大规模数据集的并行运算，是用户开发“基于hadoop的数据分析应用”的核心框架
 
@@ -35,4 +35,38 @@ Hadoop 内部完成的。
 个的输出。在这种情况下，MapReduce 并不是不能做，而是使用后，每个 MapReduce 作业
 的输出结果都会写入到磁盘，会造成大量的磁盘 IO，导致性能非常的低下。
 
+
+### 3. MapReduce核心思想
+
+
+### 4. MapReduce编程规范
+
+用户编写的程序分为三个部分：Mapper、Reducer、Driver
+
+1. Mapper阶段
+	>用户自定义的Mapper类需要继承Hadoop提供的Mapper父类，并重写其map()方法
+	
+	>Mapper的输入数据是KV对的形式
+	
+	>Mapper的业务逻辑写在map()方法中
+	
+	>Mapper的输出数据是KV对的形式
+	
+	>map()方法对每一个<K,V>调用一次
+
+
+2. Reducer阶段
+	
+	- 用户自定义的Reducer类需要继承Hadoop提供的Reducer父类，并重写其reduce()方法
+	
+	- Reducer的输入数据类型对应Mapper的输出数据类型
+	
+	- Reducer的业务逻辑写在reduce()方法中
+
+	- ReducerTask进程对每一组相同k的<k,v>组调用一次reduce()方法
+
+
+3. Driver阶段
+
+	整个MapReduce程序需要一个Driver来进行提交任务，提交的是一个描述了各种必要信息的job对象。
 
