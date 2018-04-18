@@ -180,7 +180,13 @@ hadoop 自己开发了一套序列化机制（Writable），精简、高效。
 
 ## 1、window本地Hadoop运行环境搭建
 
-window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我们下载 hadoop-common-2.7.1-bin-master 并解压
+window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我们下载 hadoop-common-2.7.1-bin-master 并解压。然后添加环境变量，如下：
+
+![](https://raw.githubusercontent.com/kingrocy/MapReduce-Study/master/images/1.png)
+
+修改Path环境变量 如下：
+
+![](https://github.com/kingrocy/MapReduce-Study/blob/master/images/2.png)
 
 
 
