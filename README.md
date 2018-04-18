@@ -43,7 +43,7 @@ Hadoop 内部完成的。
 
 用户编写的程序分为三个部分：Mapper、Reducer、Driver
 
-1. Mapper阶段
+1. **Mapper阶段**
 	- 用户自定义的Mapper类需要继承Hadoop提供的Mapper父类，并重写其map()方法
 	
 	- Mapper的输入数据是KV对的形式
@@ -55,7 +55,7 @@ Hadoop 内部完成的。
 	- map()方法对每一个<K,V>调用一次
 
 
-2. Reducer阶段
+2. **Reducer阶段**
 	
 	- 用户自定义的Reducer类需要继承Hadoop提供的Reducer父类，并重写其reduce()方法
 	
@@ -66,7 +66,7 @@ Hadoop 内部完成的。
 	- ReducerTask进程对每一组相同k的<k,v>组调用一次reduce()方法
 
 
-3. Driver阶段
+3. **Driver阶段**
 
 	整个MapReduce程序需要一个Driver来进行提交任务，提交的是一个描述了各种必要信息的job对象。
 
@@ -144,13 +144,13 @@ hadoop 自己开发了一套序列化机制（Writable），精简、高效。
 
 **步骤：**
 
-- 提供空参构造函数（hadoop反序列化创建对象时调用）
+- **提供空参构造函数**（hadoop反序列化创建对象时调用）
 
 		public SortBean() {
 	        super();
 	    }
 
-- 实现Writable接口，重写序列化和反序列化方法
+- **实现Writable接口，重写序列化和反序列化方法**
 
 		
 		//此处有个注意事项：序列化与反序列化时对对象属性的读写顺序要保持一致
@@ -168,7 +168,7 @@ hadoop 自己开发了一套序列化机制（Writable），精简、高效。
 	        height=dataInput.readInt();
 	    }
 
-- 重写toString()方法
+- **重写toString()方法**
 
 	    @Override
 	    public String toString() {
@@ -180,7 +180,7 @@ hadoop 自己开发了一套序列化机制（Writable），精简、高效。
 
 ## 1、window本地Hadoop运行环境搭建
 
-window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我们下载 hadoop-common-2.7.1-bin-master 并解压。然后添加环境变量，如下：
+window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我们下载 hadoop-common-2.7.1-bin-master 并解压。然后添加环境变量，如下(*这里我们需要注意一下：我们配置的环境变量里面的hadoop的版本是2.7，所以我们开发时使用的hadoop的jar包也必须是2.7的*)：
 
 ![](https://raw.githubusercontent.com/kingrocy/MapReduce-Study/master/images/1.png)
 
@@ -191,9 +191,39 @@ window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我
 经过上述步骤之后，我们就能愉快的在本地进行MapReduce程序调试了。。。*至于Mac系统如何本地运行MR程序，请自行百度*。。。
 
 
-## 2、编程实战
+## 2、编程实战 
 
-一般来说，我们用到MapReduce最多的就是统计、排序、分区这三个知识点了，，下面给出三个案例来学习。
+一般来说，我们用到MapReduce最多的就是**统计**、**排序**、**分区**这三个知识点了，，下面给出三个案例来学习。
+
+在码代码前，必要的工作还是先得提起说的。。首先我们得引入MapReduce开发所需要的jar包
+
+	<dependency>
+	    <groupId>org.apache.hadoop</groupId>
+	    <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+	    <version>2.7.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>2.7.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>2.7</version>
+    </dependency>
+
+本地开发时，还需导入log4j的配置文件，才能看到MapReduce程序执行的情况。
+
+	log4j.rootLogger=INFO, stdout
+	log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+	log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+	log4j.appender.stdout.layout.ConversionPattern=%d %p [%c] - %m%n
+
+这样子我们的准备工作就已经做完了。。正式开始码代码
+
 
 ### 1、WordCount案例
 
