@@ -188,6 +188,7 @@ window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我
 
 ![](https://github.com/kingrocy/MapReduce-Study/blob/master/images/2.png)
 
+经过上述步骤之后，我们就能愉快的在本地进行MapReduce程序调试了。。。*至于Mac系统如何本地运行MR程序，请自行百度*。。。
 
 
 ## 2、编程实战
