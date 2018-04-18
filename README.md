@@ -117,10 +117,82 @@ hadoop 自己开发了一套序列化机制（Writable），精简、高效。
 			<td>float</td>
 			<td>FloatWritable</td>
 		</tr>
+		<tr>
+			<td>long</td>
+			<td>LongWritable</td>
+		</tr>
+		<tr>
+			<td>double</td>
+			<td>DoubleWritable</td>
+		</tr>
+		<tr>
+			<td>string</td>
+			<td>Text</td>
+		</tr>
+		<tr>
+			<td>map</td>
+			<td>MapWritable</td>
+		</tr>
+		<tr>
+			<td>array</td>
+			<td>ArrayWritable</td>
+		</tr>
 </table>
 
 
+## 5、自定义java对象实现Hadoop的序列化（实现Writable接口）
 
+**步骤：**
+
+- 提供空参构造函数（hadoop反序列化创建对象时调用）
+
+		public SortBean() {
+	        super();
+	    }
+
+- 实现Writable接口，重写序列化和反序列化方法
+
+		
+		//此处有个注意事项：序列化与反序列化时对对象属性的读写顺序要保持一致
+		@Override
+	    public void write(DataOutput dataOutput) throws IOException {
+	        dataOutput.writeUTF(name);
+	        dataOutput.writeInt(age);
+	        dataOutput.writeInt(height);
+	    }
+	
+	    @Override
+	    public void readFields(DataInput dataInput) throws IOException {
+	        name=dataInput.readUTF();
+	        age=dataInput.readInt();
+	        height=dataInput.readInt();
+	    }
+
+- 重写toString()方法
+
+	    @Override
+	    public String toString() {
+	        return  name + '\t' + age+'\t' + height;
+	    }
+
+
+# 三、MapReduce编程
+
+## 1、window本地Hadoop运行环境搭建
+
+window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我们下载 hadoop-common-2.7.1-bin-master 并解压
+
+
+
+## 2、编程实战
+
+一般来说，我们用到MapReduce最多的就是统计、排序、分区这三个知识点了，，下面给出三个案例来学习。
+
+### 1、WordCount案例
+
+### 2、对于不同的人按身高或年龄排序
+
+### 3、对于不同的人按姓分区
 
 
 
