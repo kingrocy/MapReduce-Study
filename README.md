@@ -38,6 +38,8 @@ Hadoop 内部完成的。
 
 ### 3. MapReduce运行流程
 
+![](https://raw.githubusercontent.com/kingrocy/MapReduce-Study/master/images/3.png)
+
 
 
 
