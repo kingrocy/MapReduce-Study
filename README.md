@@ -227,9 +227,348 @@ window下如果想本地运行hadoop程序，需要配置HADOOP_HOME。首先我
 
 ### 1、WordCount案例
 
+1. 自定义的Mapper
+
+		package com.yunhui.mapreduce.wordcount;
+		import org.apache.hadoop.io.IntWritable;
+		import org.apache.hadoop.io.LongWritable;
+		import org.apache.hadoop.io.Text;
+		import org.apache.hadoop.mapreduce.Mapper;
+		
+		import java.io.IOException;
+		
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-18 17:57
+		 */
+		public class WordCountMapper extends Mapper<LongWritable,Text,Text,IntWritable> {
+		
+		    Text k=new Text();
+		
+		    IntWritable v=new IntWritable(1);
+		
+		    @Override
+		    protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		        String line=value.toString();
+		
+		        String [] strs=line.split(",");
+		
+		        for(String str:strs){
+		            k.set(str);
+		            context.write(k,v);
+		        }
+		
+		    }
+		}
+
+
+2. 自定义的Reducer
+
+		package com.yunhui.mapreduce.wordcount;
+		
+		import org.apache.hadoop.io.IntWritable;
+		import org.apache.hadoop.io.LongWritable;
+		import org.apache.hadoop.io.Text;
+		import org.apache.hadoop.mapreduce.Reducer;
+		
+		import java.io.IOException;
+		
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-18 18:00
+		 */
+		public class WordCountReduce extends Reducer<Text,IntWritable,Text,LongWritable> {
+		
+		    @Override
+		    protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+		            long count=0L;
+		            for(IntWritable intWritable:values){
+		                count+=intWritable.get();
+		            }
+		            context.write(key,new LongWritable(count));
+		    }
+		}
+
+3. Driver
+
+		package com.yunhui.mapreduce.wordcount;
+		import org.apache.hadoop.conf.Configuration;
+		import org.apache.hadoop.fs.Path;
+		import org.apache.hadoop.io.IntWritable;
+		import org.apache.hadoop.io.LongWritable;
+		import org.apache.hadoop.io.Text;
+		import org.apache.hadoop.mapreduce.Job;
+		import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+		import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+		import java.io.IOException;
+		
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-18 18:02
+		 */
+		public class WordCountDriver {
+		
+		    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+		        //创建job
+		        Configuration configuration=new Configuration();
+		        Job job= Job.getInstance(configuration);
+		
+		        //设置jar
+		        job.setJarByClass(WordCountDriver.class);
+		
+		        //设置Map类
+		        job.setMapperClass(WordCountMapper.class);
+		
+		        //设置Reducer类
+		        job.setReducerClass(WordCountReduce.class);
+		
+		        //设置Map的输出K V类型
+		        job.setMapOutputKeyClass(Text.class);
+		        job.setMapOutputValueClass(IntWritable.class);
+		
+		        //设置Reducer的输出K V类型
+		        job.setOutputKeyClass(Text.class);
+		        job.setOutputValueClass(LongWritable.class);
+		
+		        //设置输入输出路径
+		        FileInputFormat.setInputPaths(job,new Path(args[0]));
+		        FileOutputFormat.setOutputPath(job,new Path(args[1]));
+		        
+		        //提交job 为true代表任务执行成功  为false代表执行失败
+		        boolean result = job.waitForCompletion(true);
+		
+		        System.exit(result?0:1);
+		    }
+		}
+
+
+
+
 ### 2、对于不同的人按身高或年龄排序
 
+1. 自定义bean  作为key
+
+		package com.yunhui.mapreduce.sort;
+		import org.apache.hadoop.io.WritableComparable;
+		import java.io.DataInput;
+		import java.io.DataOutput;
+		import java.io.IOException;
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-18 11:17
+		 */
+		public class SortBean implements WritableComparable<SortBean>{
+		
+		    private String name;
+		
+		    private Integer age;
+		
+		    private Integer height;
+		
+		
+		    public String getName() {
+		        return name;
+		    }
+		
+		    public void setName(String name) {
+		        this.name = name;
+		    }
+		
+		    public Integer getAge() {
+		        return age;
+		    }
+		
+		    public void setAge(Integer age) {
+		        this.age = age;
+		    }
+		
+		    public Integer getHeight() {
+		        return height;
+		    }
+		
+		    public void setHeight(Integer height) {
+		        this.height = height;
+		    }
+		
+		    public SortBean() {
+		        super();
+		    }
+		
+		    public SortBean(String name, Integer age, Integer height) {
+		        this.name = name;
+		        this.age = age;
+		        this.height = height;
+		    }
+		
+		
+		    @Override
+		    public int compareTo(SortBean o) {
+		        return Integer.compare(age,o.getAge());
+		    }
+		
+		    @Override
+		    public void write(DataOutput dataOutput) throws IOException {
+		        dataOutput.writeUTF(name);
+		        dataOutput.writeInt(age);
+		        dataOutput.writeInt(height);
+		    }
+		
+		    @Override
+		    public void readFields(DataInput dataInput) throws IOException {
+		        name=dataInput.readUTF();
+		        age=dataInput.readInt();
+		        height=dataInput.readInt();
+		    }
+		
+		    @Override
+		    public String toString() {
+		        return  name + '\t' + age+'\t' + height;
+		    }
+		}
+
+
+2. Mapper
+
+		package com.yunhui.mapreduce.sort;
+		import org.apache.hadoop.io.LongWritable;
+		import org.apache.hadoop.io.NullWritable;
+		import org.apache.hadoop.io.Text;
+		import org.apache.hadoop.mapreduce.Mapper;
+		import java.io.IOException;
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-17 18:57
+		 */
+		public class SortMapper extends Mapper<LongWritable,Text,SortBean,NullWritable> {
+		
+		    @Override
+		    protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		        String line=value.toString();
+		
+		        String [] strs=line.split(",");
+		
+		        context.write(new SortBean(strs[0],Integer.parseInt(strs[1]),Integer.parseInt(strs[2])),NullWritable.get());
+		
+		    }
+		}
+
+
+3. Reducer
+
+		package com.yunhui.mapreduce.sort;
+		import org.apache.hadoop.io.NullWritable;
+		import org.apache.hadoop.mapreduce.Reducer;
+		import java.io.IOException;
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-17 19:01
+		 */
+		public class SortReducer extends Reducer<SortBean,NullWritable,SortBean,NullWritable> {
+		
+		    @Override
+		    protected void reduce(SortBean key, Iterable<NullWritable> values, Context context) throws IOException, InterruptedException {
+		           context.write(key,values.iterator().next());
+		    }
+		}
+
+
+4. Driver
+
+		package com.yunhui.mapreduce.sort;
+		import org.apache.hadoop.conf.Configuration;
+		import org.apache.hadoop.fs.Path;
+		import org.apache.hadoop.io.NullWritable;
+		import org.apache.hadoop.mapreduce.Job;
+		import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+		import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+		import java.io.IOException;
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-17 19:02
+		 */
+		public class SortDriver {
+		
+		    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+		        Configuration configuration=new Configuration();
+		
+		        Job job=Job.getInstance(configuration);
+		
+		        job.setJarByClass(SortDriver.class);
+		
+		        job.setMapperClass(SortMapper.class);
+		        job.setReducerClass(SortReducer.class);
+		        
+		        job.setMapOutputKeyClass(SortBean.class);
+		        job.setMapOutputValueClass(NullWritable.class);
+		
+		        job.setOutputKeyClass(SortBean.class);
+		        job.setOutputValueClass(NullWritable.class);
+		
+		        FileInputFormat.setInputPaths(job,new Path(args[0]));
+		        FileOutputFormat.setOutputPath(job,new Path(args[1]));
+		        
+		        boolean result = job.waitForCompletion(true);
+		        System.exit(result ? 0 : 1);
+		    }
+		}
+
+
+
+
+
 ### 3、对于不同的人按姓分区
+
+首先先说一下MapReduce默认的分区规则是HashPartitioner,其分区方法如下：
+
+    public int getPartition(K key, V value, int numReduceTasks) {
+        return (key.hashCode() & 2147483647) % numReduceTasks;
+    }
+
+
+我们如果想要自定义分区，需要继承Partitioner，重写其分区方法。
+
+这里我们是基于第二个Demo 将不同姓氏的人输出到不同的文件
+
+1. 自定义Partioner
+
+		package com.yunhui.mapreduce.sort;
+		import org.apache.hadoop.io.NullWritable;
+		import org.apache.hadoop.mapreduce.Partitioner;
+		
+		/**
+		 * @Author: Yun
+		 * @Description:
+		 * @Date: Created in 2018-04-18 14:12
+		 */
+		public class SortPartitioner extends Partitioner<SortBean,NullWritable> {
+		
+		    @Override
+		    public int getPartition(SortBean sortBean, NullWritable nullWritable, int i) {
+		        String name=sortBean.getName();
+		        if(name.startsWith("王")){
+		            return 0;
+		        }else if(name.startsWith("陈")){
+		            return 1;
+		        }else{
+		            return 2;
+		        }
+		    }
+		}
+
+
+2. 在Driver设置自定义Partioner作为分区类
+
+        //设置分区
+        job.setPartitionerClass(SortPartitioner.class);
+        job.setNumReduceTasks(3);
+
 
 
 
